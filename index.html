@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#153f38">
+  <title>Event Scheduler | DSA Micro Project</title>
+  <link rel="stylesheet" href="style.css?v=6">
+  <script src="app.js?v=6" defer></script>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div><p class="eyebrow">DSA MICRO PROJECT · LIVE DEMO</p><h1>Real-Time Event Scheduling System</h1><p class="hero-copy">Plan campus events, balance shared resources, and visualize dependencies.</p></div>
+      <div class="hero-tools"><div class="hero-status"><span class="live-dot"></span><span id="storage-status">Connecting to Python…</span></div><button id="demo-data" class="button button-light" type="button">Load showcase data</button></div>
+    </div>
+  </header>
+
+  <main>
+    <section id="counts" class="stats" aria-label="Event counts"></section>
+
+    <section class="panel schedule-panel">
+      <div class="section-heading">
+        <div><p class="eyebrow dark">SCHEDULE</p><h2>Event calendar</h2><p class="muted">Search, filter, and manage events from one place.</p></div>
+        <div class="heading-controls"><label class="compact-label" for="sort">Sort by<select id="sort"><option value="start">Start time</option><option value="title">Title</option><option value="priority">Priority</option></select></label><label class="compact-label" for="filter-status">Status<select id="filter-status"><option value="all">All statuses</option><option value="scheduled">Scheduled</option><option value="in progress">In progress</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></label><button id="undo" class="button button-soft" type="button">Undo</button><button id="export-data" class="button button-quiet" type="button">Export</button><button id="import-data" class="button button-quiet" type="button">Import</button><input id="import-file" type="file" accept="application/json,.json" hidden></div>
+      </div>
+      <div class="search-row"><label class="sr-only" for="search">Search event titles</label><input id="search" type="search" placeholder="Search event title or prefix"><button id="search-button" class="button" type="button">Search titles</button><button id="clear-search" class="button button-quiet" type="button">Show all</button></div>
+      <p id="notice" class="notice" role="status" aria-live="polite"></p>
+      <div class="table-wrap"><table><thead><tr><th>Event</th><th>Schedule</th><th>Resource</th><th>Priority</th><th>Status</th><th>Actions</th></tr></thead><tbody id="events"></tbody></table></div>
+    </section>
+
+    <div class="content-grid">
+      <section class="panel">
+        <p class="eyebrow dark">EVENT DETAILS</p><h2 id="form-heading">Create an event</h2><p class="muted">Times are prefilled for a quick demo. Same-room overlaps are prevented.</p>
+        <form id="event-form">
+          <input id="event-id" type="hidden">
+          <label>Title<input id="title" maxlength="120" required autocomplete="off"></label>
+          <label>Description<textarea id="description" maxlength="2000" rows="3"></textarea></label>
+          <div class="form-row"><label>Start time<input id="start" type="datetime-local" required></label><label>End time<input id="end" type="datetime-local" required></label></div>
+          <div class="form-row"><label>Priority <span class="field-hint">−5 to 5; higher comes first</span><input id="priority" type="number" min="-5" max="5" value="0" required></label><label>Status<select id="status"><option value="scheduled">Scheduled</option><option value="in progress">In progress</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></label></div>
+          <label>Resource name <span class="field-hint">Optional, for example “Lab A”</span><input id="resource" maxlength="100"></label>
+          <div class="button-row"><button id="save" class="button" type="submit">Save event</button><button id="clear-form" class="button button-quiet" type="button">Clear form</button></div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <p class="eyebrow dark">SCHEDULING LOGIC</p><h2>Event queues</h2>
+        <div class="queue-block"><div class="subheading"><h3>Priority queue</h3><span class="tag">HEAP</span></div><p class="muted">Highest priority, then earliest start. Completed and cancelled events are skipped.</p><ol id="priority-list" class="queue-list"></ol></div>
+        <div class="queue-block"><div class="subheading"><h3>Waiting queue</h3><span class="tag tag-amber">FIFO</span></div><p class="muted">Requests stay in arrival order; blocked requests remain queued.</p><ol id="waiting-list" class="queue-list"></ol><div class="queue-actions"><label class="sr-only" for="enqueue-event">Event to add to waiting queue</label><select id="enqueue-event"></select><button id="enqueue" class="button button-small" type="button">Add request</button></div><div class="button-row"><button id="process-queue" class="button button-outline" type="button">Process next eligible request</button><button id="clear-queue" class="button button-quiet" type="button">Clear queue</button></div></div>
+      </section>
+    </div>
+
+    <div class="content-grid lower-grid">
+      <section class="panel">
+        <p class="eyebrow dark">DEPENDENCY GRAPH</p><h2>Event relationships</h2><p class="muted">Arrows point from prerequisite to dependent. Every event appears, including events with no links; cycles and self-links are rejected.</p>
+        <div class="form-row dependency-controls"><label>Prerequisite<select id="before"></select></label><label>Dependent<select id="after"></select></label></div>
+        <div class="button-row"><button id="add-dependency" class="button" type="button">Add dependency</button><label class="compact-label traversal-label" for="traversal-start">Traverse from<select id="traversal-start"></select></label><button id="traverse" class="button button-outline" type="button">Run BFS + DFS</button></div>
+        <div id="graph-canvas" class="graph-canvas" role="img" aria-label="Event dependency graph"></div>
+        <div id="graph-output" class="graph-output" aria-live="polite">Choose a starting event to inspect its graph traversal.</div>
+      </section>
+      <section class="panel info-panel">
+        <p class="eyebrow dark">ABOUT THIS DEMO</p><h2>How the local app works</h2>
+        <p>The Python app saves events, dependencies, waiting requests, and undo history in <code>scheduler_data.json</code> in the project folder. Export creates a JSON backup of events and dependency links; queue requests and undo history stay in the local data file.</p>
+        <p>The browser displays the interface and sends your actions to the Python app running on this computer. Python handles event validation, room-conflict checks, searching, sorting, priority ranking, queue processing, undo, and graph traversal.</p>
+        <p class="small-note">This is a single-computer classroom demo, not a shared multi-user or hard real-time system. Events that touch at an endpoint (one ends at 10:00 and another starts at 10:00) do not conflict.</p>
+      </section>
+    </div>
+    <footer>Real-Time Event Scheduling System <span>·</span> Browser-based demonstration</footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+scheduler_data.json
+*.json.tmp
+events.db
+server.stderr.log
+server.stdout.log
